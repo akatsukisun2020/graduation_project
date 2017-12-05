@@ -13,9 +13,9 @@ def getkey(x):
 
 def produce_signals():
     # produce signal
-    signal1 = produce_one_signal(35, 3, 600, 0.5, 10, 10 ** 2, 1)
-    signal2 = produce_one_signal(21, 90, 860, 6.0, 10, 10 ** 2, 2)
-    signal3 = produce_one_signal(69, 45, 2100, 23, 10, 10 ** 2, 3)
+    signal1 = produce_one_signal(35, 3, 600, 0.5, 10, 50, 1)
+    signal2 = produce_one_signal(21, 90, 860, 6.0, 10, 50, 2)
+    signal3 = produce_one_signal(69, 45, 2100, 23, 10, 50, 3)
 
     # 合并所有的信号list
     signals = []
@@ -45,9 +45,6 @@ def generate_batch(batch_size, signals):
             batch = batches[row]
             x_data[row, :] = batch[: -1]  # 实际上就是取数据， 然后生成对应的batch
             y_data[row, :] = batch[-1]
-            # print("batch -- ", batch)
-            # print("x_data -- ", x_data)
-            # print("y_data -- ", y_data)
 
         x_batches.append(x_data)
         y_batches.append(y_data)
