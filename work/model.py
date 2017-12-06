@@ -11,6 +11,7 @@ def lstm_cell(model, rnn_size):
         cell_fun = tf.contrib.rnn.BasicLSTMCell
 
     cell = cell_fun(rnn_size, state_is_tuple=True)
+    cell = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=0.5)
     return cell
 
 
@@ -34,10 +35,12 @@ def rnn_model(model, input_data, output_data, vocab_size, rnn_size=128, num_laye
     # cell = tf.contrib.rnn.MultiRNNCell([cell] * num_layers, state_is_tuple=True)
     cell = tf.contrib.rnn.MultiRNNCell([lstm_cell(model, rnn_size) for _ in range(num_layers)], state_is_tuple=True)
 
-    if output_data is not None:
-        initial_state = cell.zero_state(batch_size, tf.float32)
-    else:
-        initial_state = cell.zero_state(1, tf.float32)
+# 这里测试注意批次的状态的维度
+    initial_state = cell.zero_state(batch_size, tf.float32)
+    # if output_data is not None:
+    #     initial_state = cell.zero_state(batch_size, tf.float32)
+    # else:
+    #     initial_state = cell.zero_state(1, tf.float32)
 
 # process input data
 #    with tf.device("/cpu:0"):
@@ -49,8 +52,8 @@ def rnn_model(model, input_data, output_data, vocab_size, rnn_size=128, num_laye
     # 本项目中， 直接将输入的input_data表述为这种形式就行了
     # print(input_data)
     ## TODO 在这里加名字重用
-    with tf.variable_scope("rnn", reuse=tf.AUTO_REUSE):
-        outputs, last_state = tf.nn.dynamic_rnn(cell, input_data, initial_state=initial_state)
+    # with tf.variable_scope("rnn", reuse=tf.AUTO_REUSE):
+    outputs, last_state = tf.nn.dynamic_rnn(cell, input_data, initial_state=initial_state)
     output = tf.reshape(outputs, [-1, rnn_size])
 
     weights = tf.Variable(tf.truncated_normal([rnn_size, vocab_size]))

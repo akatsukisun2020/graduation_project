@@ -5,7 +5,7 @@ import os
 import numpy as np
 from pulse_produce import produce_one_signal
 
-signal_numbers = 100000
+signal_numbers = 1000000
 
 
 def getkey(x):
