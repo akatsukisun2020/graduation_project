@@ -15,7 +15,7 @@ def lstm_cell(model, rnn_size):
 
 
 def rnn_model(model, input_data, output_data, vocab_size, rnn_size=128, num_layers=2, batch_size=64,
-              learning_rate=0.01):
+              learning_rate=0.01, is_training=True):
     """
     construct rnn seq2seq model.
     :param model: model class
@@ -48,7 +48,9 @@ def rnn_model(model, input_data, output_data, vocab_size, rnn_size=128, num_laye
     # [batch_size, ?, rnn_size] = [64, ?, 128]
     # 本项目中， 直接将输入的input_data表述为这种形式就行了
     # print(input_data)
-    outputs, last_state = tf.nn.dynamic_rnn(cell, input_data, initial_state=initial_state)
+    ## TODO 在这里加名字重用
+    with tf.variable_scope("rnn", reuse=tf.AUTO_REUSE):
+        outputs, last_state = tf.nn.dynamic_rnn(cell, input_data, initial_state=initial_state)
     output = tf.reshape(outputs, [-1, rnn_size])
 
     weights = tf.Variable(tf.truncated_normal([rnn_size, vocab_size]))

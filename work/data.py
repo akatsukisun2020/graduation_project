@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import numpy as np
 from pulse_produce import produce_one_signal
 
-signal_numbers = 10000
+signal_numbers = 100000
 
 
 def getkey(x):
@@ -13,9 +14,9 @@ def getkey(x):
 
 def produce_signals():
     # produce signal
-    signal1 = produce_one_signal(35, 3, 600, 0.5, 10, 50, 1)
-    signal2 = produce_one_signal(21, 90, 860, 6.0, 10, 50, 2)
-    signal3 = produce_one_signal(69, 45, 2100, 23, 10, 50, 3)
+    signal1 = produce_one_signal(35, 3, 600, 0.5, 10, signal_numbers, 1)
+    signal2 = produce_one_signal(21, 90, 860, 6.0, 10, signal_numbers, 2)
+    signal3 = produce_one_signal(69, 45, 2100, 23, 10, signal_numbers, 3)
 
     # 合并所有的信号list
     signals = []
@@ -26,6 +27,55 @@ def produce_signals():
     signals.sort(key=getkey)
 
     return signals
+
+
+data_dir = './data'
+training_file = data_dir + '/training_file.txt'
+testing_file = data_dir + '/testing_file.txt'
+
+
+def write_list(fd, data):
+    for num in data:
+        fd.write(str(num))
+        fd.write(' ')
+
+
+# 将产生的信号数据给写入到list文件之中
+def generate_file(signals):
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+    length = len(signals) // 2
+    training_data = signals[: length]
+    testing_data = signals[length:]
+    fd1 = open(training_file, 'w')
+    i = 0
+    for i in range(length):
+        # fd1.write(str(training_data[i]))
+        write_list(fd1, training_data[i])
+        fd1.write('\n')
+    fd1.close()
+
+    fd2 = open(testing_file, 'w')
+    j = 0
+    for j in range(length):
+        # fd2.write(str(testing_data[j]))
+        write_list(fd2, testing_data[j])
+        fd2.write('\n')
+    fd2.close()
+
+
+# 从文件中读取，形成数组， 注意， 都是浮点数
+def read_file(file):
+    fd = open(file, 'r')
+    list_data = []
+    for line in fd.readlines():
+        linestr = line[0: -2]  # 截取字符串, 构造的时候， 每行多加了2个字符 ‘ ’ ， ‘\n’
+        tmpstr = linestr.split(' ')
+        linelist = list(map(float, tmpstr))
+        list_data.append(linelist)
+    fd.close()
+
+    return list_data
 
 
 def generate_batch(batch_size, signals):
@@ -44,9 +94,32 @@ def generate_batch(batch_size, signals):
         for row in range(batch_size):
             batch = batches[row]
             x_data[row, :] = batch[: -1]  # 实际上就是取数据， 然后生成对应的batch
-            y_data[row, :] = batch[-1]
+            y_data[row, :] = int(batch[-1])  # 转化为整形
 
         x_batches.append(x_data)
         y_batches.append(y_data)
 
+    return x_batches, y_batches
+
+
+# 外部接口函数 1
+# 产生信号输入文件
+def generate_input_files():
+    signals = produce_signals()
+    generate_file(signals)
+
+
+# 外部接口函数 2
+# 读取训练数据， 形成批次
+def get_training_data(batch_size):
+    signals = read_file(training_file)
+    x_batches, y_batches = generate_batch(batch_size, signals)
+    return x_batches, y_batches
+
+
+# 外部接口函数 3
+# 读取测试数据， 形成批次
+def get_testing_data(batch_size):
+    signals = read_file(testing_file)
+    x_batches, y_batches = generate_batch(batch_size, signals)
     return x_batches, y_batches

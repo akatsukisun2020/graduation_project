@@ -2,7 +2,8 @@ import os
 import numpy as np
 import tensorflow as tf
 from data import produce_signals
-from data import generate_batch
+from data import generate_file
+from data import get_training_data
 from model import rnn_model
 
 tf.app.flags.DEFINE_integer('vocab_size', 3, 'vocab size.')
@@ -17,41 +18,18 @@ tf.app.flags.DEFINE_integer('epochs', 3, 'train how many epochs.')
 
 FLAGS = tf.app.flags.FLAGS
 
+data = [[1,2,3,1,2,3], [4,5,6,4,5,6], [7,8,9,7,8,9], [10,11,12,10,11,12], [13,14,15,13,14,15], [16,17,18,16,17,18]]
 
 def run_training():
-    if not os.path.exists(FLAGS.model_dir):
-        os.makedirs(FLAGS.model_dir)
+    print(data)
+    print(float(data))
 
-    # poems_vector, word_to_int, vocabularies = process_poems(FLAGS.file_path)
-    # batches_inputs, batches_outputs = generate_batch(FLAGS.batch_size, poems_vector, word_to_int)
-
-    signals = produce_signals()
-    x_batches, y_batches = generate_batch(FLAGS.batch_size * FLAGS.time_steps, signals)
-    # x_batches = tf.reshape(x_batches_,[-1, FLAGS.time_steps, FLAGS.pulse_size])  # reshape input_data
-
-## add by sun
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
-
-    with tf.Session(config=config) as sess:
-        # sess = tf_debug.LocalCLIDebugWrapperSession(sess=sess)
-        # sess.add_tensor_filter("has_inf_or_nan", tf_debug.has_inf_or_nan)
-
-        start_epoch = 0
-        try:
-            for epoch in range(start_epoch, FLAGS.epochs):
-                n = 0
-                n_chunk = len(x_batches) ## how many batch
-                for batch in range(n_chunk):
-                    # process input data
-                    input_batch = tf.reshape(x_batches[n],[-1, FLAGS.time_steps, FLAGS.pulse_size])  # reshape input_data
-                    output_batch = tf.reshape(y_batches[n],[-1, FLAGS.time_steps, 1])  # reshape input_data 这里的第3维度为 1
-                    print(sess.run(input_batch))
-                    print(sess.run(output_batch))
-
-                    n += 1
-        except KeyboardInterrupt:
-            print('## Interrupt manually, try saving checkpoint for now...')
+    # signals = produce_signals()
+#     generate_file(data)
+#     print("training_file data :")
+#     x, y = get_training_data(1)
+#     print(x)
+#     print(y)
 
 
 def main(_):
